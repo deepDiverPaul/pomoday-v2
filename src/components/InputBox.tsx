@@ -450,7 +450,7 @@ export const InputBox = props => {
         Type anything, or press <code>/</code> to search.
       </span>
       <button
-        onClick={openInput.bind(this.false, this.false)}
+        onClick={openInput.bind(false, false)}
         className={
           'sm:hidden text-5xl bg-green text-white rounded-full shadow-lg w-16 h-16'
         }>
