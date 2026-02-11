@@ -1,4 +1,4 @@
-import marked from 'marked';
+import { marked } from 'marked';
 import Queue from './queue';
 import Sherlock from 'sherlockjs';
 import uuidv4 from 'uuid/v4';
@@ -186,7 +186,8 @@ const processFilterMatchingTag = (input, search) =>
 
 export const taskAsString = (t, search?: string) => {
   const decoded = decodeHtmlEntities(
-    marked(t)
+    marked
+      .parse(t, { async: false })
       .replace('<p>', '')
       .replace('</p>', ''),
   );

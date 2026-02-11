@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { KEY_ESC } from '../helpers/utils';
 import { StateContext } from './App';
-import marked from 'marked';
+import { marked } from 'marked';
 import { useEventListener } from '../helpers/hooks';
 
 const QUICK_HELP_TEXT = [
@@ -74,7 +74,11 @@ export const QuickHelp = props => {
         </div>
         <div
           className={'markdown-content relative flex flex-col el-quickhelp'}
-          dangerouslySetInnerHTML={{ __html: marked(QUICK_HELP_TEXT[page]) }}
+          dangerouslySetInnerHTML={{
+            __html: marked.parse(QUICK_HELP_TEXT[page], {
+              async: false,
+            }) as string,
+          }}
         />
         <div
           className={
