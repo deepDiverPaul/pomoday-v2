@@ -55,7 +55,7 @@ const tutorialTasks: TaskItem[] = [
   createTask(
     8,
     '@demo',
-    'Type `st` or `stop` followed by the `task id` to stop the timer.',
+    'Type `s` or `stop` followed by the `task id` to stop the timer.',
     TaskStatus.WAIT,
   ),
   createTask(

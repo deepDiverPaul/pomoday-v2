@@ -156,7 +156,7 @@ export const InputBox = (props) => {
             case 'flag':
               tasksToUpdate = flagCommand(tasksToUpdate, state, ids);
               break;
-            case 'st':
+            case 's':
             case 'stop':
               tasksToUpdate = stopCommand(tasksToUpdate, state, ids);
               break;
@@ -267,8 +267,8 @@ export const InputBox = (props) => {
         let c = String.fromCharCode(event.keyCode).toLowerCase();
         if (event.shiftKey) c = c.toUpperCase();
         // For special commands, insert the space afterward
-        const specialCommands = 'bcde';
-        if (specialCommands.indexOf(c) !== -1) c += ' ';
+        const specialCommands = 'tbces';
+        if (specialCommands.includes(c)) c += ' ';
         openInput(event.shiftKey, false, c);
       }
     }
@@ -380,7 +380,7 @@ export const InputBox = (props) => {
             </p>
             <p>
               <b>
-                <u>st</u>op:
+                <u>s</u>top:
               </b>{' '}
               stop timer
             </p>
