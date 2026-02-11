@@ -36,10 +36,11 @@ import {
   stopCommand,
   switchCommand,
   tagRenameCommand,
+  dueCommand,
 } from '../helpers/commands/actions';
 import { useEventListener } from '../helpers/hooks';
 
-export const InputBox = props => {
+export const InputBox = (props) => {
   const inputRef = React.useRef(null);
   const suggestRef = React.useRef(null);
   const [state, setState] = React.useContext(StateContext);
@@ -49,18 +50,18 @@ export const InputBox = props => {
   const history: Queue<string> = getHistoryQueue(state.history);
   let suggestion = '';
 
-  const processInput = e => {
+  const processInput = (e) => {
     if (suggestRef && suggestRef.current) {
       const value = inputRef.current.value;
       if (value) {
-        const matched = history.match(i => i.indexOf(value) === 0);
+        const matched = history.match((i) => i.indexOf(value) === 0);
         suggestion = findCommon(matched);
         // Special case: If it's edit command, fetch the task content
         const isEditCommand = value.match(/^e(?:dit)?\ (\d+)\s?$/i);
         if (isEditCommand && isEditCommand[1]) {
           const id = parseInt(isEditCommand[1]);
           if (id && !isNaN(id)) {
-            const found = (state.tasks.filter(t => t.id === id) || []).pop();
+            const found = (state.tasks.filter((t) => t.id === id) || []).pop();
             if (found) {
               suggestion = `${value.trim()} ${found.title}`;
             }
@@ -78,7 +79,7 @@ export const InputBox = props => {
     }
   };
 
-  const onKeyDown = e => {
+  const onKeyDown = (e) => {
     if (inputRef && inputRef.current) {
       if (!state.sawTheInput) {
         setState({
@@ -132,7 +133,7 @@ export const InputBox = props => {
         };
         if (cmd) {
           const ids = cmd.id
-            ? (cmd.id.match(/\d+/g) || []).map(s => parseInt(s))
+            ? (cmd.id.match(/\d+/g) || []).map((s) => parseInt(s))
             : null;
           switch (cmd.command.toLowerCase()) {
             case 'mv':
@@ -178,6 +179,9 @@ export const InputBox = props => {
             case 'e':
             case 'edit':
               tasksToUpdate = editTaskCommand(ids, cmd, tasksToUpdate, state);
+              break;
+            case 'due':
+              tasksToUpdate = dueCommand(ids, cmd, tasksToUpdate, state);
               break;
             case 'tr':
             case 'tagre':
@@ -240,7 +244,7 @@ export const InputBox = props => {
     }
   };
 
-  const focusInput = event => {
+  const focusInput = (event) => {
     if (
       state.showHelp ||
       state.showQuickHelp ||
@@ -280,7 +284,8 @@ export const InputBox = props => {
         !state.settings.stickyInput
           ? 'absolute top-0 right-0 bottom-0 left-0'
           : ''
-      } flex items-center justify-center`}>
+      } flex items-center justify-center`}
+    >
       <div
         className={`el-editor bg-control2nd border-stall-light border
         ${
@@ -294,10 +299,11 @@ export const InputBox = props => {
               ? 'h-64'
               : 'h-64 mb-32'
             : state.settings.stickyInput
-            ? 'h-12'
-            : 'h-12 mb-64'
+              ? 'h-12'
+              : 'h-12 mb-64'
         }
-        relative overflow-hidden`}>
+        relative overflow-hidden`}
+      >
         <textarea
           ref={inputRef}
           className={`bg-transparent text-foreground w-full h-full p-3 px-4 absolute top-0 left-0 z-10 resize-none ${
@@ -326,12 +332,14 @@ export const InputBox = props => {
       <div
         className={
           'block sm:hidden fixed bottom-0 right-0 sm:right-auto sm:left-0 m-5'
-        }>
+        }
+      >
         <button
           onClick={hideInput}
           className={
             'sm:hidden text-3xl bg-tomato text-white rounded-full shadow-lg w-16 h-16'
-          }>
+          }
+        >
           ✕
         </button>
       </div>
@@ -340,7 +348,8 @@ export const InputBox = props => {
           <span
             className={
               'hidden sm:block bg-white px-3 py-2 rounded-lg shadow-lg'
-            }>
+            }
+          >
             Press <code>Enter</code> for new line. <code>Ctrl + Enter</code> for
             submit.
           </span>
@@ -348,7 +357,8 @@ export const InputBox = props => {
           <span
             className={`hidden sm:block bg-white px-3 py-2 rounded-lg shadow-lg ${
               state.settings.stickyInput ? 'mb-10' : ''
-            }`}>
+            }`}
+          >
             <p>
               <b>
                 <u>/</u>:
@@ -446,14 +456,16 @@ export const InputBox = props => {
   ) : state.showQuickHelp || state.showHelp ? null : (
     <div className={'fixed bottom-0 right-0 m-5'}>
       <span
-        className={'hidden sm:block bg-white px-3 py-2 rounded-lg shadow-lg'}>
+        className={'hidden sm:block bg-white px-3 py-2 rounded-lg shadow-lg'}
+      >
         Type anything, or press <code>/</code> to search.
       </span>
       <button
         onClick={openInput.bind(false, false)}
         className={
           'sm:hidden text-5xl bg-green text-white rounded-full shadow-lg w-16 h-16'
-        }>
+        }
+      >
         ⌨
       </button>
     </div>

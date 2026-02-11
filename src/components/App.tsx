@@ -131,6 +131,10 @@ const getInitialState = () => {
               parsed[key] = parsed[key].map((t: TaskItem) => ({
                 ...t,
                 uuid: t.uuid || generateUuid(),
+                logs: t.logs || [],
+                archived: t.archived || false,
+                lastaction: t.lastaction || Date.now(),
+                dueDate: typeof t.dueDate === 'number' ? t.dueDate : null,
               }));
             }
           }
@@ -206,7 +210,7 @@ export const App = () => {
         }
         return arr;
       }, [])
-      .map(t => {
+      .map((t) => {
         if (t === 'done') return 'Finished';
         if (t === 'flagged') return 'Flagged';
         if (t === 'wait') return 'Pending';
@@ -217,9 +221,9 @@ export const App = () => {
 
   const taskGroups = [...state.tasks]
     .sort((a, b) => a.id - b.id)
-    .filter(t => t.status !== TaskStatus.NONE)
-    .filter(t => !t.archived)
-    .filter(t =>
+    .filter((t) => t.status !== TaskStatus.NONE)
+    .filter((t) => !t.archived)
+    .filter((t) =>
       state.filterBy
         ? t.title.match(new RegExp(state.filterBy, 'ig')) !== null ||
           t.tag.match(new RegExp(state.filterBy, 'ig')) !== null
@@ -275,20 +279,20 @@ export const App = () => {
 
   const countDone = (group, g) => {
     return (
-      group.hidden.filter(t => t.tag === g && t.status === TaskStatus.DONE)
+      group.hidden.filter((t) => t.tag === g && t.status === TaskStatus.DONE)
         .length +
-      group.display[g].filter(t => t.status === TaskStatus.DONE).length
+      group.display[g].filter((t) => t.status === TaskStatus.DONE).length
     );
   };
 
   const countTotal = (group, g) => {
     return (
       taskGroups.display[g].length +
-      group.hidden.filter(t => t.tag === g).length
+      group.hidden.filter((t) => t.tag === g).length
     );
   };
 
-  const processHotKey = e => {
+  const processHotKey = (e) => {
     if (mainViewRef && mainViewRef.current) {
       if (!document.activeElement.tagName.match(/body/i)) return;
       if (
@@ -329,7 +333,8 @@ export const App = () => {
       <div
         className={`w-screen h-screen relative flex flex-col font-mono text-foreground bg-background draggable ${
           state.darkMode ? 'dark' : 'light'
-        }`}>
+        }`}
+      >
         <StatusBar />
         {/* Filtering */}
         {state.filterBy ? (
@@ -347,7 +352,8 @@ export const App = () => {
               <div
                 className={
                   'absolute flex flex-col leading-relaxed justify-center items-center top-0 left-0 right-0 bottom-0 text-center text-lg sm:text-xl text-foreground'
-                }>
+                }
+              >
                 <div>Need to get some work done?</div>
                 <div>Let's add some task!</div>
               </div>
@@ -355,7 +361,8 @@ export const App = () => {
           ) : (
             <div
               ref={mainViewRef}
-              className="el-main-view flex-1 p-5 h-full overflow-y-auto">
+              className="el-main-view flex-1 p-5 h-full overflow-y-auto"
+            >
               {taskGroups.hidden.length ? (
                 <div className="pb-5 text-stall-dim">
                   {taskGroups.hidden.length} tasks in{' '}
