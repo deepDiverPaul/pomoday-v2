@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { StateContext } from './App';
+import { StateContext, syncTasks } from './App';
 import {
   findCommon,
   getHistoryQueue,
@@ -214,6 +214,7 @@ export const InputBox = (props) => {
           ...updateCandidate,
           history: history.push(inputRef.current.value),
         });
+        syncTasks(state, setState, false);
         inputRef.current.value = '';
         setVisible(false);
         event.preventDefault();

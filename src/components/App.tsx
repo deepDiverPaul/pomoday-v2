@@ -147,7 +147,7 @@ const getInitialState = () => {
 };
 
 let pushInProgress = false;
-const syncTasks = async (state, setState, isPull) => {
+export const syncTasks = async (state, setState, isPull) => {
   if (!isPull) {
     if (state.tasks.length) {
       pushInProgress = true;
@@ -186,7 +186,7 @@ export const App = () => {
   React.useEffect(() => {
     if (state.authToken && Date.now() - state.lastSync >= SYNC_TIMER) {
       (async () => {
-        await syncTasks(state, setState, false);
+        await syncTasks(state, setState, true);
       })();
     }
   }, [state.tasks, state.authToken]);
