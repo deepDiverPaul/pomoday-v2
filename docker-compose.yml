@@ -4,5 +4,6 @@ services:
     build: ./
     image: pomoday
     restart: unless-stopped
+    command: npm run serve
     ports:
-      - "8888:8888"
+      - "5173:5173"

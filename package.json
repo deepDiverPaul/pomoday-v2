@@ -6,8 +6,9 @@
   "license": "BSD-3-Clause",
   "scripts": {
     "dev": "vite",
-    "dist": "vite build",
+    "build": "vite build",
     "preview": "vite preview",
+    "start": "vite serve",
     "test": "ts-node node_modules/tape/bin/tape test/**/*.test.ts"
   },
   "dependencies": {
