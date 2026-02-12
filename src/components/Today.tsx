@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { StateContext } from './App';
+import { StateContext } from '../services/stateService';
 import {
   isSameDay,
   TaskStatus,
@@ -8,7 +8,7 @@ import {
   getStatus,
 } from '../helpers/utils';
 
-export const Today = (props) => {
+export const Today = () => {
   const [state, setState] = React.useContext(StateContext);
   const now = Date.now();
   // Build activity logs for today

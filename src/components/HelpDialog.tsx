@@ -1,11 +1,9 @@
 import * as React from 'react';
 import { KEY_ESC } from '../helpers/utils';
-import { StateContext } from './App';
+import { StateContext } from '../services/stateService';
 import { useEventListener } from '../helpers/hooks';
 
-const HELP_TEXT = ``;
-
-export const HelpDialog = props => {
+export const HelpDialog = () => {
   const [state, setState] = React.useContext(StateContext);
 
   const closeHelp = () => {
@@ -15,7 +13,7 @@ export const HelpDialog = props => {
     });
   };
 
-  const processKey = e => {
+  const processKey = (e) => {
     if (e.keyCode === KEY_ESC) {
       closeHelp();
     }
@@ -31,21 +29,24 @@ export const HelpDialog = props => {
             onClick={closeHelp}
             className={
               'sm:hidden text-3xl bg-tomato text-white rounded-full shadow-lg w-16 h-16'
-            }>
+            }
+          >
             ✕
           </button>
         </div>
         <div
           className={
             'block p-5 border border-control bg-white rounded-lg shadow-xl'
-          }>
+          }
+        >
           <div className={'text-left'}>
             Hey! Help page has been moved to our{' '}
             <a
               className={'text-tomato'}
               href={'https://github.com/huytd/pomoday-v2/wiki'}
               target={'_blank'}
-              rel={'nofollow'}>
+              rel={'nofollow'}
+            >
               Github
             </a>{' '}
             Wiki.
@@ -57,7 +58,8 @@ export const HelpDialog = props => {
               }
               href={'https://github.com/huytd/pomoday-v2/wiki'}
               target={'_blank'}
-              rel={'nofollow'}>
+              rel={'nofollow'}
+            >
               Go to Wiki
             </a>
           </div>

@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { StateContext } from './App';
+import { StateContext } from '../services/stateService';
 import { useInterval } from '../helpers/hooks';
 import { SYNC_TIMER } from '../helpers/utils';
 
-export const StatusBar = props => {
+export const StatusBar = () => {
   const [state, setState] = React.useContext(StateContext);
   const [duration, setDuration] = React.useState(0);
 
@@ -14,7 +14,7 @@ export const StatusBar = props => {
     state.authToken ? 1000 : 0,
   );
 
-  const lastSyncColor = duration => {
+  const lastSyncColor = (duration) => {
     if (duration < SYNC_TIMER) {
       return 'text-green';
     }
@@ -29,18 +29,20 @@ export const StatusBar = props => {
             <div className="flex justify-start items-center text-stall-dim">
               {state.authToken && state.lastSync ? (
                 <a
-                  className={`block flex items-center hover:text-gray-700 ml-4 ${lastSyncColor(
+                  className={`flex items-center hover:text-gray-700 ml-4 ${lastSyncColor(
                     duration,
                   )}`}
                   title={
                     'Last synced at ' +
                     new Date(state.lastSync).toLocaleTimeString()
                   }
-                  href="javascript:void(0)">
+                  href="javascript:void(0)"
+                >
                   <svg
                     className="fill-current w-4 h-4"
                     xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20">
+                    viewBox="0 0 20 20"
+                  >
                     <g stroke="none" stroke-width="1" fill-rule="evenodd">
                       <g>
                         <path d="M16.8792928,9.09695343 C18.6654343,9.4976045 20,11.09295 20,13 C20,15.209139 18.209139,17 16,17 L5,17 C2.23857625,17 0,14.7614237 0,12 C0,9.58046798 1.71857515,7.56233069 4.00162508,7.09968852 C4.00054449,7.06659179 4,7.03335948 4,7 C4,5.34314575 5.34314575,4 7,4 C7.55384606,4 8.07263826,4.1500834 8.51792503,4.41179863 C9.4182103,3.53797709 10.6462795,3 12,3 C14.7614237,3 17,5.23857625 17,8 C17,8.37684164 16.9583108,8.74394625 16.8792928,9.09695343 Z"></path>
@@ -50,29 +52,33 @@ export const StatusBar = props => {
                 </a>
               ) : null}
               <a
-                className="block flex items-center hover:text-gray-700 ml-4"
+                className="flex items-center hover:text-gray-700 ml-4"
                 title={'Help'}
                 target={'_blank'}
                 rel={'nofollow'}
-                href="https://github.com/huytd/pomoday-v2/wiki">
+                href="https://github.com/huytd/pomoday-v2/wiki"
+              >
                 <svg
                   className="fill-current w-4 h-4"
                   xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20">
+                  viewBox="0 0 20 20"
+                >
                   <title>Help</title>
                   <path d="M10,0.4c-5.302,0-9.6,4.298-9.6,9.6s4.298,9.6,9.6,9.6c5.301,0,9.6-4.298,9.6-9.601 C19.6,4.698,15.301,0.4,10,0.4z M9.849,15.599H9.798c-0.782-0.023-1.334-0.6-1.311-1.371c0.022-0.758,0.587-1.309,1.343-1.309 l0.046,0.002c0.804,0.023,1.35,0.594,1.327,1.387C11.18,15.068,10.625,15.599,9.849,15.599z M13.14,9.068 c-0.184,0.26-0.588,0.586-1.098,0.983l-0.562,0.387c-0.308,0.24-0.494,0.467-0.563,0.688c-0.056,0.174-0.082,0.221-0.087,0.576v0.09 H8.685l0.006-0.182c0.027-0.744,0.045-1.184,0.354-1.547c0.485-0.568,1.555-1.258,1.6-1.287c0.154-0.115,0.283-0.246,0.379-0.387 c0.225-0.311,0.324-0.555,0.324-0.793c0-0.334-0.098-0.643-0.293-0.916c-0.188-0.266-0.545-0.398-1.061-0.398 c-0.512,0-0.863,0.162-1.072,0.496c-0.216,0.341-0.325,0.7-0.325,1.067v0.092H6.386L6.39,7.841c0.057-1.353,0.541-2.328,1.435-2.897 C8.388,4.583,9.089,4.4,9.906,4.4c1.068,0,1.972,0.26,2.682,0.772c0.721,0.519,1.086,1.297,1.086,2.311 C13.673,8.05,13.494,8.583,13.14,9.068z" />
                 </svg>
               </a>
               <a
-                className="block flex items-center hover:text-gray-700 ml-4"
+                className="flex items-center hover:text-gray-700 ml-4"
                 title={'Report a bug'}
                 target={'_blank'}
                 rel={'nofollow'}
-                href="https://github.com/huytd/pomoday-v2/issues/new">
+                href="https://github.com/huytd/pomoday-v2/issues/new"
+              >
                 <svg
                   className="fill-current w-4 h-4"
                   xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20">
+                  viewBox="0 0 20 20"
+                >
                   <title>Report a bug</title>
                   <g stroke="none" strokeWidth="1" fillRule="evenodd">
                     <g>
@@ -89,11 +95,13 @@ export const StatusBar = props => {
                     ...state,
                     showSettings: true,
                   });
-                }}>
+                }}
+              >
                 <svg
                   className="fill-current w-4 h-4"
                   xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20">
+                  viewBox="0 0 20 20"
+                >
                   <title>Setting</title>
                   <g stroke="none" strokeWidth="1" fillRule="evenodd">
                     <g>

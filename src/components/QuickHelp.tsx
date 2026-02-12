@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { KEY_ESC } from '../helpers/utils';
-import { StateContext } from './App';
+import { StateContext } from '../services/stateService';
 import { marked } from 'marked';
 import { useEventListener } from '../helpers/hooks';
 
@@ -13,7 +13,7 @@ const QUICK_HELP_TEXT = [
   "🎉 That's all of the basic you need! You can type `help` to learn more about Pomoday anytime! Now press `ESC` to close this help and go try it yourself!",
 ];
 
-export const QuickHelp = (props) => {
+export const QuickHelp = () => {
   const [state, setState] = React.useContext(StateContext);
   const [page, setPage] = React.useState(0);
 

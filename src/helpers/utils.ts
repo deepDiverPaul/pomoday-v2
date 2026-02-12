@@ -18,7 +18,7 @@ export const KEY_ESC = 27;
 
 export const MAX_COMMAND_QUEUE_LENGTH = 10;
 export const SYNC_TIMER = 1000;
-export const AUTO_SYNC_TIMER = 10000;
+export const AUTO_SYNC_TIMER = 100000;
 
 const encodeHtmlEntities = (str) => {
   var buf = [];
@@ -219,7 +219,7 @@ export const findCommon = (items: string[]): string => {
       (l, i) => (l < i.length ? i.length : l),
       items[0].length,
     );
-    let len = 0;
+    let len: number;
     for (len = 0; len < minLength; len++) {
       const base = items[0].charAt(len);
       let allMatched = true;

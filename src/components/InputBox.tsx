@@ -1,21 +1,18 @@
 import * as React from 'react';
-import { StateContext, syncTasks } from './App';
+import { StateContext, syncTasks } from '../services/stateService';
 import {
   findCommon,
   getHistoryQueue,
   KEY_DOWN,
   KEY_ESC,
   KEY_F,
-  KEY_INPUT,
   KEY_N,
   KEY_P,
   KEY_RETURN,
-  KEY_RIGHT,
   KEY_SLASH,
   KEY_TAB,
   KEY_UP,
   MAX_COMMAND_QUEUE_LENGTH,
-  KEY_SHIFT,
 } from '../helpers/utils';
 import Queue from '../helpers/queue';
 import { parseCommand } from '../helpers/commands/parser';
@@ -40,7 +37,7 @@ import {
 } from '../helpers/commands/actions';
 import { useEventListener } from '../helpers/hooks';
 
-export const InputBox = (props) => {
+export const InputBox = () => {
   const inputRef = React.useRef(null);
   const suggestRef = React.useRef(null);
   const [state, setState] = React.useContext(StateContext);
@@ -50,14 +47,14 @@ export const InputBox = (props) => {
   const history: Queue<string> = getHistoryQueue(state.history);
   let suggestion = '';
 
-  const processInput = (e) => {
+  const processInput = () => {
     if (suggestRef && suggestRef.current) {
       const value = inputRef.current.value;
       if (value) {
         const matched = history.match((i) => i.indexOf(value) === 0);
         suggestion = findCommon(matched);
         // Special case: If it's edit command, fetch the task content
-        const isEditCommand = value.match(/^e(?:dit)?\ (\d+)\s?$/i);
+        const isEditCommand = value.match(/^e(?:dit)? (\d+)\s?$/i);
         if (isEditCommand && isEditCommand[1]) {
           const id = parseInt(isEditCommand[1]);
           if (id && !isNaN(id)) {
@@ -79,7 +76,7 @@ export const InputBox = (props) => {
     }
   };
 
-  const onKeyDown = (e) => {
+  const onKeyDown = async (e) => {
     if (inputRef && inputRef.current) {
       if (!state.sawTheInput) {
         setState({
@@ -210,11 +207,15 @@ export const InputBox = (props) => {
             tasks: tasksToUpdate,
           };
         }
-        setState({
-          ...updateCandidate,
-          history: history.push(inputRef.current.value),
-        });
-        syncTasks(state, setState, false);
+        console.log({ updateCandidate });
+        await syncTasks(
+          {
+            ...updateCandidate,
+            history: history.push(inputRef.current.value),
+          },
+          setState,
+          false,
+        );
         inputRef.current.value = '';
         setVisible(false);
         event.preventDefault();

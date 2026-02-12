@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { StateContext } from './App';
+import { StateContext } from '../services/stateService';
 import { TaskItem, RowType } from '../helpers/utils';
 import { Row } from './Row';
 
-export const ArchivedList = props => {
+export const ArchivedList = () => {
   const [state, setState] = React.useContext(StateContext);
-  const archivedItems = state.tasks.filter(t => t.archived);
+  const archivedItems = state.tasks.filter((t) => t.archived);
   const taskGroups = archivedItems.reduce(
     (groups, t: TaskItem) => {
       if (!groups.display[t.tag]) {
@@ -34,7 +34,8 @@ export const ArchivedList = props => {
           onClick={closeDialog}
           className={
             'sm:hidden text-3xl bg-tomato text-white rounded-full shadow-lg w-16 h-16'
-          }>
+          }
+        >
           ✕
         </button>
       </div>
