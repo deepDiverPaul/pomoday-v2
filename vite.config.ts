@@ -1,4 +1,5 @@
 import { defineConfig, loadEnv } from 'vite';
+// @ts-ignore
 import react from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
@@ -11,6 +12,9 @@ export default defineConfig(({ mode }) => {
       'process.env.TRACKING': JSON.stringify(env.TRACKING || ''),
       'process.env.GAID': JSON.stringify(env.GAID || ''),
       'process.env.API_URL': JSON.stringify(env.API_URL || ''),
+    },
+    server: {
+      allowedHosts: ['pomoday.cloud.deep-node.de'],
     },
   };
 });
