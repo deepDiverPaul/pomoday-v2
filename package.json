@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "vite serve",
+    "start": "vite serve --host",
     "test": "ts-node node_modules/tape/bin/tape test/**/*.test.ts"
   },
   "dependencies": {
