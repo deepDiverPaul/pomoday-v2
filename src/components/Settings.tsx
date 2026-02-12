@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { KEY_ESC } from '../helpers/utils';
-import { StateContext } from './App';
+import { StateContext } from '../services/stateService';
 import { useEventListener } from '../helpers/hooks';
 
-export const Settings = props => {
+export const Settings = () => {
   const [state, setState] = React.useContext(StateContext);
 
   const close = () => {
@@ -13,7 +13,7 @@ export const Settings = props => {
     });
   };
 
-  const processKey = e => {
+  const processKey = (e) => {
     if (e.keyCode === KEY_ESC) {
       close();
     }
@@ -29,7 +29,8 @@ export const Settings = props => {
             onClick={close}
             className={
               'sm:hidden text-3xl bg-tomato text-white rounded-full shadow-lg w-16 h-16'
-            }>
+            }
+          >
             ✕
           </button>
         </div>
@@ -54,7 +55,7 @@ export const Settings = props => {
           <input
             type={'checkbox'}
             checked={state.settings.stickyInput}
-            onChange={e => {
+            onChange={(e) => {
               setState({
                 ...state,
                 settings: {
@@ -74,7 +75,7 @@ export const Settings = props => {
           <input
             type={'checkbox'}
             checked={state.settings.hintPopup}
-            onChange={e => {
+            onChange={(e) => {
               setState({
                 ...state,
                 settings: {

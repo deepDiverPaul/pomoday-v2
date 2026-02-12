@@ -1,7 +1,13 @@
-import { generateUuid, stopWorkLogging, TaskItem, TaskStatus } from '../utils';
+import {
+  generateUuid,
+  stopWorkLogging,
+  TaskItem,
+  TaskStatus,
+  parseDueDate,
+} from '../utils';
 
 export function moveCommand(tasksToUpdate: any, state, ids, cmd) {
-  tasksToUpdate = state.tasks.map(t => {
+  tasksToUpdate = state.tasks.map((t) => {
     if (ids.indexOf(t.id) !== -1) {
       t.tag = cmd.tag;
     }
@@ -11,7 +17,7 @@ export function moveCommand(tasksToUpdate: any, state, ids, cmd) {
 }
 
 export function beginCommand(tasksToUpdate: any, state, ids) {
-  tasksToUpdate = state.tasks.map(t => {
+  tasksToUpdate = state.tasks.map((t) => {
     if (ids.indexOf(t.id) !== -1) {
       if (t.status !== TaskStatus.WIP) {
         t.status = TaskStatus.WIP;
@@ -27,7 +33,7 @@ export function beginCommand(tasksToUpdate: any, state, ids) {
 }
 
 export function checkCommand(tasksToUpdate: any, state, ids) {
-  tasksToUpdate = state.tasks.map(t => {
+  tasksToUpdate = state.tasks.map((t) => {
     if (ids.indexOf(t.id) !== -1) {
       t.status =
         t.status === TaskStatus.DONE ? TaskStatus.WAIT : TaskStatus.DONE;
@@ -103,7 +109,7 @@ export function deleteCommand(tasksToUpdate: any, ids, cmd, state) {
 }
 
 export function flagCommand(tasksToUpdate: any, state, ids) {
-  tasksToUpdate = state.tasks.map(t => {
+  tasksToUpdate = state.tasks.map((t) => {
     if (ids.indexOf(t.id) !== -1) {
       t.status =
         t.status === TaskStatus.FLAG ? TaskStatus.WAIT : TaskStatus.FLAG;
@@ -115,7 +121,7 @@ export function flagCommand(tasksToUpdate: any, state, ids) {
 }
 
 export function stopCommand(tasksToUpdate: any, state, ids) {
-  tasksToUpdate = state.tasks.map(t => {
+  tasksToUpdate = state.tasks.map((t) => {
     if (ids.indexOf(t.id) !== -1) {
       if (t.status === TaskStatus.WIP) {
         t.status = TaskStatus.WAIT;
@@ -132,7 +138,7 @@ export function switchCommand(tasksToUpdate: any, state, ids) {
   if (Array.isArray(ids) && ids.length) {
     const stopId = ids[0];
     const startId = ids[1];
-    tasksToUpdate = state.tasks.map(t => {
+    tasksToUpdate = state.tasks.map((t) => {
       if (t.id === stopId) {
         if (t.status === TaskStatus.WIP) {
           t.status = TaskStatus.WAIT;
@@ -159,7 +165,7 @@ export function archiveCommand(ids, cmd, tasksToUpdate: any, state) {
     // Archive by tag
     const tag = (cmd.id.match(/^(@.*)/) || []).pop();
     if (tag) {
-      tasksToUpdate = state.tasks.map(t => {
+      tasksToUpdate = state.tasks.map((t) => {
         if (t.tag === tag) {
           t.archived = true;
         }
@@ -168,7 +174,7 @@ export function archiveCommand(ids, cmd, tasksToUpdate: any, state) {
     }
   } else {
     // Archive by Ids
-    tasksToUpdate = state.tasks.map(t => {
+    tasksToUpdate = state.tasks.map((t) => {
       if (ids.indexOf(t.id) !== -1) {
         t.archived = true;
       }
@@ -183,7 +189,7 @@ export function restoreCommand(ids, cmd, tasksToUpdate: any, state) {
     // Archive by tag
     const tag = (cmd.id.match(/^(@.*)/) || []).pop();
     if (tag) {
-      tasksToUpdate = state.tasks.map(t => {
+      tasksToUpdate = state.tasks.map((t) => {
         if (t.tag === tag) {
           t.archived = false;
         }
@@ -192,7 +198,7 @@ export function restoreCommand(ids, cmd, tasksToUpdate: any, state) {
     }
   } else {
     // Archive by Ids
-    tasksToUpdate = state.tasks.map(t => {
+    tasksToUpdate = state.tasks.map((t) => {
       if (ids.indexOf(t.id) !== -1) {
         t.archived = false;
       }
@@ -215,7 +221,7 @@ export function insertTaskCommand(cmd, state, tasksToUpdate: any) {
       return maxId;
     }, 0);
     tasksToUpdate = state.tasks
-      .filter(t => t.id !== nextId + 1)
+      .filter((t) => t.id !== nextId + 1)
       .concat({
         uuid: generateUuid(),
         id: nextId + 1,
@@ -225,6 +231,7 @@ export function insertTaskCommand(cmd, state, tasksToUpdate: any) {
         logs: [],
         archived: false,
         lastaction: Date.now(),
+        dueDate: null,
       } as TaskItem);
   }
   return tasksToUpdate;
@@ -235,9 +242,31 @@ export function editTaskCommand(ids, cmd, tasksToUpdate: any, state) {
     const id = ids[0];
     const task = cmd.text;
     if (task && task.length) {
-      tasksToUpdate = state.tasks.map(t => {
+      tasksToUpdate = state.tasks.map((t) => {
         if (t.id === id) {
           t.title = task;
+        }
+        return t;
+      });
+    }
+  }
+  return tasksToUpdate;
+}
+
+export function dueCommand(ids, cmd, tasksToUpdate: any, state) {
+  {
+    const id = ids && ids.length ? ids[0] : null;
+    const text = (cmd.text || '').trim();
+    if (id) {
+      tasksToUpdate = state.tasks.map((t: TaskItem) => {
+        if (t.id === id) {
+          if (/^(clear|none|remove)$/i.test(text)) {
+            t.dueDate = null;
+          } else if (text && text.length) {
+            const ts = parseDueDate(text);
+            t.dueDate = ts;
+          }
+          t.lastaction = Date.now();
         }
         return t;
       });
@@ -249,7 +278,7 @@ export function editTaskCommand(ids, cmd, tasksToUpdate: any, state) {
 export function tagRenameCommand(cmd, tasksToUpdate: any, state) {
   {
     const [from, to] = cmd.tag.split(' ');
-    tasksToUpdate = state.tasks.map(t => {
+    tasksToUpdate = state.tasks.map((t) => {
       if (t.tag.match(from)) {
         t.tag = to;
       }
@@ -413,7 +442,7 @@ export function otherCommand(updateCandidate, cmd, state) {
       // actually a demo, when login.
       return {
         ...updateCandidate,
-        tasks: updateCandidate.tasks.filter(t =>
+        tasks: updateCandidate.tasks.filter((t) =>
           (t.id - 1) * (t.id - 12) <= 0 ? t.tag !== '@demo' : true,
         ),
         userWantToLogin: true,

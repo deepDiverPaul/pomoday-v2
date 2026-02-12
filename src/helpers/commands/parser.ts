@@ -8,6 +8,7 @@ const parseTaskCommand = (str: string) =>
   str.match(/^(t(?:ask)?)\s(@(?:\S*['-]?)(?:[0-9a-zA-Z'-]+))?([\s\S]*)/i);
 const parseEditCommand = (str: string) =>
   str.match(/^(e(?:dit)?)\s(\d+)([\s\S]*)/i);
+const parseDueCommand = (str: string) => str.match(/^(due)\s(\d+)([\s\S]*)/i);
 const parseMoveCommand = (str: string) =>
   str.match(/^(mv|move)\s(?:(\d+)\s)+(@(?:\S*['-]?)(?:[0-9a-zA-Z'-]+))/i);
 const parseCheckCommand = (str: string) =>
@@ -60,6 +61,18 @@ function compileEditCommand(input: string) {
       command: matchEdit[1],
       id: matchEdit[2],
       text: matchEdit[3].trim(),
+    } as Command;
+  }
+  return null;
+}
+
+function compileDueCommand(input: string) {
+  const matchDue = parseDueCommand(input);
+  if (matchDue) {
+    return {
+      command: matchDue[1],
+      id: matchDue[2],
+      text: matchDue[3].trim(),
     } as Command;
   }
   return null;
@@ -150,6 +163,9 @@ export const parseCommand = (input: string): Command => {
   if (ret) return ret;
 
   ret = compileEditCommand(input);
+  if (ret) return ret;
+
+  ret = compileDueCommand(input);
   if (ret) return ret;
 
   ret = compileMoveCommand(input);

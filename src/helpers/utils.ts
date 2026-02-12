@@ -1,4 +1,4 @@
-import marked from 'marked';
+import { marked } from 'marked';
 import Queue from './queue';
 import Sherlock from 'sherlockjs';
 import uuidv4 from 'uuid/v4';
@@ -18,9 +18,9 @@ export const KEY_ESC = 27;
 
 export const MAX_COMMAND_QUEUE_LENGTH = 10;
 export const SYNC_TIMER = 1000;
-export const AUTO_SYNC_TIMER = 10000;
+export const AUTO_SYNC_TIMER = 100000;
 
-const encodeHtmlEntities = str => {
+const encodeHtmlEntities = (str) => {
   var buf = [];
   for (var i = str.length - 1; i >= 0; i--) {
     buf.unshift(['&#', str[i].charCodeAt(), ';'].join(''));
@@ -28,8 +28,8 @@ const encodeHtmlEntities = str => {
   return buf.join('');
 };
 
-const decodeHtmlEntities = str =>
-  str.replace(/&#(\d+);/g, function(match, dec) {
+const decodeHtmlEntities = (str) =>
+  str.replace(/&#(\d+);/g, function (match, dec) {
     return String.fromCharCode(dec);
   });
 
@@ -83,6 +83,7 @@ export type TaskItem = {
   logs: Worklog[];
   archived: boolean;
   lastaction: number;
+  dueDate?: number | null;
 };
 
 export const generateUuid = uuidv4;
@@ -93,6 +94,7 @@ export const createTask = (
   task: string,
   status: TaskStatus,
   logs?: Worklog[],
+  dueDate?: number | null,
 ): TaskItem => {
   return {
     uuid: generateUuid(),
@@ -103,7 +105,19 @@ export const createTask = (
     logs: logs || [],
     archived: false,
     lastaction: Date.now(),
+    dueDate: dueDate ?? null,
   };
+};
+
+export const parseDueDate = (text: string): number | null => {
+  try {
+    const parsed = Sherlock.parse(text);
+    if (parsed && parsed.startDate) {
+      return parsed.startDate.getTime();
+    }
+  } catch {}
+  const ts = Date.parse(text);
+  return isNaN(ts) ? null : ts;
 };
 
 export const getStatus = (status: TaskStatus | null, absolute: boolean) => {
@@ -146,9 +160,9 @@ export const stopWorkLogging = (t: TaskItem) => {
   return t;
 };
 
-export const pad = n => (n > 9 ? `${n}` : `0${n}`);
+export const pad = (n) => (n > 9 ? `${n}` : `0${n}`);
 
-export const counterAsString = counter => {
+export const counterAsString = (counter) => {
   const days = ~~(counter / 86400);
   const remain = counter - days * 86400;
   const hrs = ~~(remain / 3600);
@@ -159,7 +173,7 @@ export const counterAsString = counter => {
   }${pad(min)}:${pad(sec)}`;
 };
 
-export const counterAsLog = counter => {
+export const counterAsLog = (counter) => {
   const days = ~~(counter / 86400);
   const remain = counter - days * 86400;
   const hrs = ~~(remain / 3600);
@@ -170,7 +184,7 @@ export const counterAsLog = counter => {
   }${min > 0 ? pad(min) + ' min ' : ''}${pad(sec) + ' sec '}`;
 };
 
-const processInlineTag = input =>
+const processInlineTag = (input) =>
   input.replace(
     /#(?=\S*['-]?)([0-9a-zA-Z'-]+)/g,
     '<span class="inline-tag">#$1</span>',
@@ -180,15 +194,13 @@ const processFilterMatchingTag = (input, search) =>
   search
     ? input.replace(
         new RegExp(search, 'ig'),
-        matched => '<span class="inline-filter-tag">' + matched + '</span>',
+        (matched) => '<span class="inline-filter-tag">' + matched + '</span>',
       )
     : input;
 
 export const taskAsString = (t, search?: string) => {
   const decoded = decodeHtmlEntities(
-    marked(t)
-      .replace('<p>', '')
-      .replace('</p>', ''),
+    marked.parse(t, { async: false }).replace('<p>', '').replace('</p>', ''),
   );
   if (search) {
     return processFilterMatchingTag(decoded, search);
@@ -207,7 +219,7 @@ export const findCommon = (items: string[]): string => {
       (l, i) => (l < i.length ? i.length : l),
       items[0].length,
     );
-    let len = 0;
+    let len: number;
     for (len = 0; len < minLength; len++) {
       const base = items[0].charAt(len);
       let allMatched = true;

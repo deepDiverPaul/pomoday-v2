@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { StateContext } from './App';
+import { StateContext } from '../services/stateService';
 import { KEY_ESC } from '../helpers/utils';
 import { authenticateUser } from '../helpers/api';
 import { useEventListener } from '../helpers/hooks';
@@ -9,7 +9,7 @@ enum UIAuthState {
   LOADING,
 }
 
-export const AuthDialog = props => {
+export const AuthDialog = () => {
   const [state, setState] = React.useContext(StateContext);
   const [uiState, setUIState] = React.useState({
     status: UIAuthState.WAIT,
@@ -37,7 +37,7 @@ export const AuthDialog = props => {
         errorMessage: '',
       });
       authenticateUser(username, password, server)
-        .then(authToken => {
+        .then((authToken) => {
           setState({
             ...state,
             authToken: authToken,
@@ -68,7 +68,7 @@ export const AuthDialog = props => {
     });
   };
 
-  const processKey = e => {
+  const processKey = (e) => {
     if (e.keyCode === KEY_ESC) {
       closeDialog();
     }
@@ -83,7 +83,8 @@ export const AuthDialog = props => {
           onClick={closeDialog}
           className={
             'sm:hidden text-3xl bg-tomato text-white rounded-full shadow-lg w-16 h-16'
-          }>
+          }
+        >
           ✕
         </button>
       </div>
@@ -127,7 +128,8 @@ export const AuthDialog = props => {
                 onClick={doLogin}
                 className={
                   'px-5 py-1 bg-green text-white focus:opacity-75 hover:opacity-75'
-                }>
+                }
+              >
                 Login
               </button>
             </div>

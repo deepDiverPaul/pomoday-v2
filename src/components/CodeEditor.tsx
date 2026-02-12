@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { StateContext } from './App';
+import { StateContext } from '../services/stateService';
 import { KEY_RETURN } from '../helpers/utils';
 
-export const CodeEditor = props => {
+export const CodeEditor = () => {
   const [state, setState] = React.useContext(StateContext);
   const customCSSRef = React.useRef(null);
 
@@ -15,7 +15,7 @@ export const CodeEditor = props => {
     }
   };
 
-  const processEnterKey = e => {
+  const processEnterKey = (e) => {
     if (customCSSRef && customCSSRef.current) {
       const el = customCSSRef.current;
       const key = e.which || e.keyCode;
@@ -54,7 +54,8 @@ export const CodeEditor = props => {
           onClick={closeDialog}
           className={
             'sm:hidden text-3xl bg-tomato text-white rounded-full shadow-lg w-16 h-16'
-          }>
+          }
+        >
           ✕
         </button>
       </div>

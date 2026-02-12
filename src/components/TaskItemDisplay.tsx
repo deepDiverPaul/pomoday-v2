@@ -1,8 +1,13 @@
 import * as React from 'react';
 import { TimeSpent } from './TimeSpent';
-import { getStatus, taskAsString, TaskStatus } from '../helpers/utils';
+import {
+  getStatus,
+  taskAsString,
+  TaskStatus,
+  isSameDay,
+} from '../helpers/utils';
 
-export const TaskItemDisplay = props => {
+export const TaskItemDisplay = (props) => {
   const task = props.task;
   const matching = props.matching || undefined;
   return (
@@ -26,6 +31,22 @@ export const TaskItemDisplay = props => {
           />
         </span>{' '}
         <TimeSpent task={task} />
+        {typeof task.dueDate === 'number' ? (
+          <span
+            className={
+              'ml-2 text-xs ' +
+              (task.status === TaskStatus.DONE
+                ? 'text-stall-dim'
+                : (task.dueDate as number) < Date.now()
+                  ? 'text-tomato'
+                  : isSameDay(Date.now(), task.dueDate as number)
+                    ? 'text-orange'
+                    : 'text-stall-dim')
+            }
+          >
+            Due {new Date(task.dueDate as number).toLocaleDateString()}
+          </span>
+        ) : null}
       </div>
     </div>
   );

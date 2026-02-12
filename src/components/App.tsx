@@ -1,225 +1,44 @@
 import * as React from 'react';
 import { Row } from './Row';
 import { Today } from './Today';
-import {
-  AUTO_SYNC_TIMER,
-  createTask,
-  generateUuid,
-  getHistoryQueue,
-  RowType,
-  SYNC_TIMER,
-  TaskItem,
-  TaskStatus,
-} from '../helpers/utils';
+import { RowType, TaskItem, TaskStatus } from '../helpers/utils';
 import { InputBox } from './InputBox';
 import { GoogleAnalytics } from './GoogleAnalytics';
 import { CodeEditor } from './CodeEditor';
 import { ArchivedList } from './ArchivedList';
 import { HelpDialog } from './HelpDialog';
 import { AuthDialog } from './AuthDialog';
-import { pullFromDB, pushToDB } from '../helpers/api';
 import { StatusBar } from './StatusBar';
 import { QuickHelp } from './QuickHelp';
-import { useEventListener, useInterval } from '../helpers/hooks';
+import { useEventListener } from '../helpers/hooks';
 import { Settings } from './Settings';
-
-export const StateContext = React.createContext<any>(null);
-
-const tutorialTasks: TaskItem[] = [
-  createTask(1, '@demo', "Let's learn the basic of Pomoday:", TaskStatus.FLAG),
-  createTask(2, '@demo', 'This is a task', TaskStatus.WAIT),
-  createTask(3, '@demo', 'This is an ongoing task', TaskStatus.WIP, [
-    { start: Date.now(), end: 0 },
-  ]),
-  createTask(4, '@demo', 'This is a finished task', TaskStatus.DONE, [
-    { start: Date.now() - 1.5 * 60 * 60 * 1000, end: Date.now() },
-  ]),
-  createTask(
-    5,
-    '@demo',
-    'You can open the command input by pressing any key. Multiline input starts with capital characters.',
-    TaskStatus.WAIT,
-  ),
-  createTask(
-    6,
-    '@demo',
-    'In the command input, you can create a new task by entering the task content. Yes, markdown is\n\nsupported! You can also create a task with a tag, type `@<tag-name>` at the beginning.',
-    TaskStatus.WAIT,
-  ),
-  createTask(
-    7,
-    '@demo',
-    'Type `b` or `begin` followed by the `task id` to start the timer on a task.',
-    TaskStatus.WAIT,
-  ),
-  createTask(
-    8,
-    '@demo',
-    'Type `st` or `stop` followed by the `task id` to stop the timer.',
-    TaskStatus.WAIT,
-  ),
-  createTask(
-    9,
-    '@demo',
-    'Now, try use `c` or `check` followed by the `task id` to mark a task as done.',
-    TaskStatus.WAIT,
-  ),
-  createTask(
-    10,
-    '@demo',
-    'Type `e` or `edit`, followed by the `task id` to edit task content.',
-    TaskStatus.WAIT,
-  ),
-  createTask(
-    11,
-    '@demo',
-    "To see how your day's going, type `today`. Try it!",
-    TaskStatus.WAIT,
-  ),
-  createTask(
-    12,
-    '@demo',
-    "That's all! Now, type `delete @demo` to remove all of this tutorial content and start using Pomoday!",
-    TaskStatus.FLAG,
-  ),
-];
-
-const defaultState = {
-  tasks: tutorialTasks,
-  showHelp: false,
-  showQuickHelp: true,
-  showToday: false,
-  darkMode: false,
-  sawTheInput: false,
-  taskVisibility: {
-    done: true,
-    flagged: true,
-    wait: true,
-    wip: true,
-  },
-  history: getHistoryQueue(),
-  showSettings: false,
-  settings: {
-    hintPopup: true,
-    stickyInput: false,
-    autoDarkMode: false,
-  },
-  showCustomCSS: false,
-  customCSS: '',
-  showArchived: false,
-  userWantToLogin: false,
-  authToken: '',
-  userName: '',
-  serverUrl: '',
-  lastSync: 0,
-  filterBy: '',
-};
-
-const getInitialState = () => {
-  if (window.localStorage) {
-    const saved = window.localStorage.getItem('pomoday');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed) {
-          for (let key in defaultState) {
-            if (!parsed.hasOwnProperty(key)) {
-              parsed[key] = defaultState[key];
-            }
-            // fill up all missing data because of schema changes here
-            if (key === 'tasks') {
-              parsed[key] = parsed[key].map((t: TaskItem) => ({
-                ...t,
-                uuid: t.uuid || generateUuid(),
-              }));
-            }
-          }
-          return parsed;
-        }
-      } catch {}
-    }
-  }
-  return defaultState;
-};
-
-let pushInProgress = false;
-const syncTasks = async (state, setState, isPull) => {
-  if (!isPull) {
-    if (state.tasks.length) {
-      pushInProgress = true;
-      const data = await pushToDB(
-        state.tasks,
-        state.serverUrl,
-        state.authToken,
-      );
-      pushInProgress = false;
-      setState({
-        ...state,
-        tasks: data.tasks,
-        lastSync: Date.now(),
-      });
-    }
-  } else {
-    if (!pushInProgress) {
-      const data = await pullFromDB(state.serverUrl, state.authToken);
-      setState({
-        ...state,
-        tasks: data.tasks,
-        lastSync: Date.now(),
-      });
-    }
-  }
-};
+import { StateContext, useAppState } from '../services/stateService';
 
 export const App = () => {
-  const [state, setState] = React.useState(getInitialState());
+  const [state, setState] = useAppState();
   const mainViewRef = React.useRef(null);
 
-  React.useEffect(() => {
-    window.localStorage.setItem('pomoday', JSON.stringify(state));
-  }, [state]);
-
-  React.useEffect(() => {
-    if (state.authToken && Date.now() - state.lastSync >= SYNC_TIMER) {
-      (async () => {
-        await syncTasks(state, setState, false);
-      })();
-    }
-  }, [state.tasks, state.authToken]);
-
-  useInterval(
-    () => {
-      if (state.authToken && Date.now() - state.lastSync >= SYNC_TIMER) {
-        (async () => {
-          await syncTasks(state, setState, true);
-        })();
-      }
-    },
-    state.authToken ? AUTO_SYNC_TIMER : 0,
-  ); // Auto sync
-
   const getVisibilityStatusText = (): string[] => {
-    const hidden = Object.keys(state.taskVisibility)
+    return Object.keys(state.taskVisibility)
       .reduce((arr, k) => {
         if (state.taskVisibility[k] === false) {
           arr.push(k);
         }
         return arr;
       }, [])
-      .map(t => {
+      .map((t) => {
         if (t === 'done') return 'Finished';
         if (t === 'flagged') return 'Flagged';
         if (t === 'wait') return 'Pending';
         if (t === 'wip') return 'On Going';
       });
-    return hidden;
   };
 
   const taskGroups = [...state.tasks]
     .sort((a, b) => a.id - b.id)
-    .filter(t => t.status !== TaskStatus.NONE)
-    .filter(t => !t.archived)
-    .filter(t =>
+    .filter((t) => t.status !== TaskStatus.NONE)
+    .filter((t) => !t.archived)
+    .filter((t) =>
       state.filterBy
         ? t.title.match(new RegExp(state.filterBy, 'ig')) !== null ||
           t.tag.match(new RegExp(state.filterBy, 'ig')) !== null
@@ -275,20 +94,20 @@ export const App = () => {
 
   const countDone = (group, g) => {
     return (
-      group.hidden.filter(t => t.tag === g && t.status === TaskStatus.DONE)
+      group.hidden.filter((t) => t.tag === g && t.status === TaskStatus.DONE)
         .length +
-      group.display[g].filter(t => t.status === TaskStatus.DONE).length
+      group.display[g].filter((t) => t.status === TaskStatus.DONE).length
     );
   };
 
   const countTotal = (group, g) => {
     return (
       taskGroups.display[g].length +
-      group.hidden.filter(t => t.tag === g).length
+      group.hidden.filter((t) => t.tag === g).length
     );
   };
 
-  const processHotKey = e => {
+  const processHotKey = (e) => {
     if (mainViewRef && mainViewRef.current) {
       if (!document.activeElement.tagName.match(/body/i)) return;
       if (
@@ -329,7 +148,8 @@ export const App = () => {
       <div
         className={`w-screen h-screen relative flex flex-col font-mono text-foreground bg-background draggable ${
           state.darkMode ? 'dark' : 'light'
-        }`}>
+        }`}
+      >
         <StatusBar />
         {/* Filtering */}
         {state.filterBy ? (
@@ -347,7 +167,8 @@ export const App = () => {
               <div
                 className={
                   'absolute flex flex-col leading-relaxed justify-center items-center top-0 left-0 right-0 bottom-0 text-center text-lg sm:text-xl text-foreground'
-                }>
+                }
+              >
                 <div>Need to get some work done?</div>
                 <div>Let's add some task!</div>
               </div>
@@ -355,7 +176,8 @@ export const App = () => {
           ) : (
             <div
               ref={mainViewRef}
-              className="el-main-view flex-1 p-5 h-full overflow-y-auto">
+              className="el-main-view flex-1 p-5 h-full overflow-y-auto"
+            >
               {taskGroups.hidden.length ? (
                 <div className="pb-5 text-stall-dim">
                   {taskGroups.hidden.length} tasks in{' '}

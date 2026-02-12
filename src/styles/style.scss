@@ -43,8 +43,8 @@
 
 @mixin shadow-border($weight, $color) {
   box-shadow: 0 $weight 0 0 $color; /* Border bottom */
-  box-shadow: 0 -$weight 0 0 $color; /* Border top */
-  box-shadow: -$weight 0 0 0 $color; /* Border left */
+  box-shadow: 0 (-$weight) 0 0 $color; /* Border top */
+  box-shadow: (-$weight) 0 0 0 $color; /* Border left */
   box-shadow: $weight 0 0 0 $color; /* Border right */
   box-shadow: 0 0 0 $weight $color; /* All the borders by using the spread properties */
 }
